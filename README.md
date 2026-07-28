@@ -1,5 +1,5 @@
 # meggy-philozophy
-This repository is for practicing the Claude Code.
+This repository is for putting all Meggy Z's songs paraphrases.
 
 ## Jatuh Bangun – Meggy Z
 
