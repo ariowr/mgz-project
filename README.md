@@ -1,4 +1,4 @@
-# clacode-training
+# meggy-philozophy
 This repository is for practicing the Claude Code.
 
 ## Jatuh Bangun – Meggy Z
