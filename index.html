@@ -12,6 +12,7 @@
       --muted: #555;
       --accent: #8a2be2;
       --border: #e5e5e5;
+      --card-bg: #f7f5fb;
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -20,6 +21,7 @@
         --muted: #a0a0a0;
         --accent: #b388ff;
         --border: #2a2a2a;
+        --card-bg: #1a1720;
       }
     }
     * { box-sizing: border-box; }
@@ -44,10 +46,98 @@
       margin-top: 0;
       margin-bottom: 2rem;
     }
+    .header-img {
+      display: block;
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin: 0 auto 1.5rem;
+    }
+
+    /* Search */
+    .search-wrap {
+      position: relative;
+      margin: 2rem 0 0.5rem;
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+    #search-input {
+      width: 100%;
+      padding: 0.9rem 1rem 0.9rem 2.6rem;
+      font-size: 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--fg);
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    #search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+    .search-hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0.6rem 0 0;
+    }
+
+    /* Results */
+    #results {
+      margin-top: 1.5rem;
+    }
+    .result-card {
+      display: block;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      color: var(--fg);
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+    .result-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+    .result-title {
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+      color: var(--accent);
+    }
+    .result-snippet {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .empty-state {
+      color: var(--muted);
+      font-size: 0.95rem;
+      padding: 1rem 0.25rem;
+    }
+
+    /* Browse-all fallback list */
+    #browse-all h2 {
+      font-size: 1.1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
     ul.song-list {
       list-style: none;
       padding: 0;
-      margin: 2rem 0;
+      margin: 1rem 0 2rem;
     }
     ul.song-list li {
       border-bottom: 1px solid var(--border);
@@ -67,14 +157,7 @@
       content: " →";
       color: var(--accent);
     }
-    .header-img {
-  display: block;
-  width: 100%;
-  max-height: 320px;
-  object-fit: cover;
-  border-radius: 12px;
-  margin: 0 auto 1.5rem;
-}
+
     footer {
       margin-top: 3rem;
       font-size: 0.85rem;
@@ -86,15 +169,181 @@
   <main>
     <img class="header-img" src="header.png" alt="Header MGZ Project" />
     <h1>MGZ Project</h1>
-    <p class="subtitle">Katalog parafrase dan pembahasan makna filosofi lagu-lagu Meggy Z</p>
+    <p class="subtitle">Parafrase &amp; pembahasan makna filosofi lagu-lagu Meggy Z</p>
 
-  <ul class="song-list">
-  <li><a href="jatuh-bangun.html">Jatuh Bangun</a></li>
-  <li><a href="senyum-membawa-luka.html">Senyum Membawa Luka</a></li>
-  <li><a href="sakit-gigi.html">Sakit Gigi</a></li>
-</ul>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        id="search-input"
+        type="text"
+        autocomplete="off"
+        placeholder="Ketik apa yang kamu rasakan… misal 'diselingkuhi karena uang'"
+      />
+    </div>
+    <p class="search-hint">Coba: "putus cinta", "kecewa", "susah move on", "pasangan matre"</p>
+
+    <div id="results"></div>
+
+    <div id="browse-all">
+      <h2>Semua Lagu</h2>
+      <ul class="song-list">
+        <li><a href="jatuh-bangun.html">Jatuh Bangun</a></li>
+        <li><a href="senyum-membawa-luka.html">Senyum Membawa Luka</a></li>
+        <li><a href="sakit-gigi.html">Sakit Gigi</a></li>
+      </ul>
+    </div>
 
     <footer>Created by ariowr 2026</footer>
   </main>
+
+  <script>
+    // ============================================================
+    // DATABASE LAGU
+    // Setiap lagu punya: title, url, tags (kata kunci tema hidup),
+    // dan excerpt (cuplikan parafrase untuk preview hasil pencarian)
+    // ============================================================
+    const SONGS = [
+      {
+        title: "Jatuh Bangun",
+        url: "jatuh-bangun.html",
+        tags: [
+          "cinta bertepuk sebelah tangan", "pengorbanan tidak dihargai",
+          "tuntutan pasangan berlebihan", "disakiti saat terluka",
+          "memutuskan mundur dari hubungan", "tidak siap menghadapi masalah bersama",
+          "kesetiaan tidak dibalas", "lelah berjuang demi cinta",
+          "usaha tidak dihargai", "hubungan yang melelahkan", "capek dalam hubungan"
+        ],
+        excerpt: "Tentang seseorang yang berulang kali berusaha meraih cinta pasangannya, namun usahanya tak pernah dihargai dan justru dituntut lebih dari kemampuannya."
+      },
+      {
+        title: "Senyum Membawa Luka",
+        url: "senyum-membawa-luka.html",
+        tags: [
+          "dikhianati", "direbut orang lain", "cinta bertepuk sebelah tangan",
+          "kecewa dalam cinta", "memilih move on", "pengkhianatan pasangan",
+          "susah move on", "sakit hati karena cinta", "diselingkuhi",
+          "perselingkuhan", "ditinggal untuk orang lain", "patah hati"
+        ],
+        excerpt: "Tentang ironi sebuah senyuman yang seharusnya membahagiakan, justru jadi sumber luka batin karena kasih sayang pasangan diberikan pada orang lain."
+      },
+      {
+        title: "Sakit Gigi",
+        url: "sakit-gigi.html",
+        tags: [
+          "putus cinta karena uang", "ditinggalkan demi materi", "kecewa karena cinta",
+          "sakit hati", "ikhlas dan merelakan", "move on dari kekecewaan",
+          "pasangan matre", "cinta ditinggal demi rupiah", "diselingkuhi karena uang",
+          "putus karena harta", "susah move on", "menerima kenyataan"
+        ],
+        excerpt: "Tentang seseorang yang ditinggalkan pasangannya demi uang, dan sindiran satir bahwa sakit gigi masih lebih ringan dibanding sakit hati akibat cinta."
+      }
+    ];
+
+    // ============================================================
+    // KAMUS SINONIM SEDERHANA (bahasa Indonesia sehari-hari)
+    // Membantu "memahami" variasi kata untuk topik hidup yang sama
+    // ============================================================
+    const SYNONYMS = {
+      "uang": ["duit", "materi", "harta", "rupiah", "kaya", "matre"],
+      "putus": ["cerai", "pisah", "berpisah", "ditinggal", "diputuskan"],
+      "selingkuh": ["berpaling", "dikhianati", "khianat", "pengkhianatan", "diselingkuhi"],
+      "kecewa": ["sakit hati", "terluka", "patah hati", "hancur hati"],
+      "capek": ["lelah", "cape", "penat", "lesu"],
+      "move": ["moveon", "bangkit", "ikhlas", "relakan", "melupakan"],
+      "sabar": ["tabah", "tahan", "kuat"],
+      "cinta": ["sayang", "kasih", "asmara"]
+    };
+
+    const STOPWORDS = new Set([
+      "yang","di","ke","dari","dan","atau","ini","itu","saya","aku","kamu",
+      "dia","nya","untuk","dengan","pada","adalah","apa","apakah","gimana",
+      "bagaimana","tentang","soal","kalo","kalau","lagi","lagu","musik","tolong"
+    ]);
+
+    function normalize(str) {
+      return str
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, " ")
+        .split(/\s+/)
+        .filter(Boolean);
+    }
+
+    function expandTokens(tokens) {
+      const expanded = new Set(tokens);
+      tokens.forEach(t => {
+        for (const [key, syns] of Object.entries(SYNONYMS)) {
+          if (t === key || syns.includes(t)) {
+            expanded.add(key);
+            syns.forEach(s => expanded.add(s));
+          }
+        }
+      });
+      return [...expanded];
+    }
+
+    function search(query) {
+      const rawTokens = normalize(query).filter(t => !STOPWORDS.has(t) && t.length > 1);
+      if (rawTokens.length === 0) return [];
+
+      const tokens = expandTokens(rawTokens);
+
+      const scored = SONGS.map(song => {
+        let score = 0;
+        const tagText = song.tags.join(" | ").toLowerCase();
+        const titleText = song.title.toLowerCase();
+        const bodyText = (song.excerpt + " " + song.tags.join(" ")).toLowerCase();
+
+        tokens.forEach(tok => {
+          if (tagText.includes(tok)) score += 3;
+          if (titleText.includes(tok)) score += 2;
+          if (bodyText.includes(tok)) score += 1;
+        });
+
+        return { song, score };
+      });
+
+      return scored
+        .filter(s => s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map(s => s.song);
+    }
+
+    // ============================================================
+    // UI: live search dengan debounce
+    // ============================================================
+    const input = document.getElementById("search-input");
+    const resultsEl = document.getElementById("results");
+    const browseAllEl = document.getElementById("browse-all");
+    let debounceTimer;
+
+    function renderResults(query) {
+      const q = query.trim();
+      if (q === "") {
+        resultsEl.innerHTML = "";
+        browseAllEl.style.display = "";
+        return;
+      }
+      browseAllEl.style.display = "none";
+
+      const matches = search(q);
+      if (matches.length === 0) {
+        resultsEl.innerHTML = `<div class="empty-state">Belum ada lagu yang cocok dengan "${q}". Coba kata kunci lain, misal "putus cinta" atau "kecewa".</div>`;
+        return;
+      }
+
+      resultsEl.innerHTML = matches.map(song => `
+        <a class="result-card" href="${song.url}">
+          <div class="result-title">${song.title}</div>
+          <p class="result-snippet">${song.excerpt}</p>
+        </a>
+      `).join("");
+    }
+
+    input.addEventListener("input", (e) => {
+      clearTimeout(debounceTimer);
+      const value = e.target.value;
+      debounceTimer = setTimeout(() => renderResults(value), 200);
+    });
+  </script>
 </body>
 </html>
